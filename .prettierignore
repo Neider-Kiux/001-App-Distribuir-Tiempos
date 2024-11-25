@@ -1,0 +1,14 @@
+# Ignore artifacts:
+build
+
+
+# Ignore all HTML files:
+**/*.min.css
+**/*.min.js
+
+**/.git
+**/.svn
+**/.hg
+**/node_modules
+**/build
+**/vendors

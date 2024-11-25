@@ -1,0 +1,34 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  padding: 0.1rem 0.3rem;
+}
+
+main {
+  background-color: #ccc;
+  margin: 1rem;
+  width: 100%;
+  max-width: 50rem;
+
+  .botonesCabecera {}
+
+  #Registros {
+    background-color: #eee;
+    padding: 1rem;
+    height: min-content;
+
+    .registro {
+      background-color: #ccc;
+      height: 1rem;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    .registro:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
