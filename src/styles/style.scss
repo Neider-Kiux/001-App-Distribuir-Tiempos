@@ -1,6 +1,15 @@
 * {
   margin: 0;
   padding: 0;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+:root {
+  --orange: #ffa322;
+  --red: #903;
+  --blue: #1e6dad;
+  --black: #0e0e0e;
 }
 
 button {
@@ -8,27 +17,75 @@ button {
 }
 
 main {
-  background-color: #ccc;
-  margin: 1rem;
-  width: 100%;
-  max-width: 50rem;
+  .vigilancia_judicial {
+    width: 100%;
+    margin: auto;
+    font-family: Open Sans, sans-serif;
 
-  .botonesCabecera {}
+    &-cabecera {
+      .vigilancia {
+        &_titulo {
+          background-color: var(--red);
+          color: white;
+          font-size: 1rem;
+          text-align: center;
+          margin-top: 0.0625rem;
+        }
 
-  #Registros {
-    background-color: #eee;
-    padding: 1rem;
-    height: min-content;
+        &_agregarRuta {
+          min-height: 2.75rem;
+          width: 100%;
+          background-color: #eeeeee;
+          display: flex;
+          padding: .5rem;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: .5rem;
+          margin-top: 0.0625rem;
 
-    .registro {
-      background-color: #ccc;
-      height: 1rem;
-      width: 100%;
-      margin-bottom: 1rem;
+          input#fechaParaRuta {
+            width: 7.625rem;
+            height: 1.875rem;
+            border-radius: .25rem;
+            text-align: center;
+          }
+
+          input,
+          button,
+          select {
+            border: solid 0.0625rem #cecece;
+          }
+
+          select {
+            width: calc(100% - 8.625rem);
+            max-width: 21rem;
+            height: 1.625rem;
+            margin-left: .5rem;
+            border-radius: .5rem;
+          }
+
+          button#ButtonAgregarRegistros {
+            @extend input#fechaParaRuta;
+            margin-left: auto;
+            background: linear-gradient(180deg, #eee, #fff);
+          }
+
+          button#ButtonAgregarRegistros:hover {
+            margin-left: auto;
+            background: linear-gradient(360deg, #eee, #fff);
+          }
+        }
+      }
     }
+  }
 
-    .registro:last-child {
-      margin-bottom: 0;
-    }
+  .protegido {
+    color: red;
+  }
+}
+
+@media screen and (min-width: 900px) {
+  .vigilancia_judicial {
+    max-width: 56.25rem;
   }
 }

@@ -1,9 +1,24 @@
 import '../styles/style.scss';
-import {CrearElementoHTML, CrearElementoHTML_Text, CrearElementoHTML_Select} from '../tools/CrearHTML/CrearElementoHTML.js';
-import {Proyecto} from './proyectos';
+import {CrearElementoHTML, CrearElementoHTML_Text, CrearElementoHTML_Select, CrearElementoHTML_Option} from '../tools/CrearElementoHTML.js';
+// import {Proyecto} from './proyectos';
+import {API} from '../tools/API.js';
+import AirDatepicker from 'air-datepicker';
+import {datepickerOptions} from '../tools/datepicker-options.js';
+import 'air-datepicker/air-datepicker.css';
 
 let Registros = [];
 let TiempoGeneral_Minutos = 0;
+const Api = new API();
+
+class Ruta_ {
+  id_ruta;
+  fecha;
+  contenedor = document.getElementById('Edid_Rutas');
+  constructor(id_ruta, fecha) {
+    this.id_ruta = id_ruta;
+    this.fecha = fecha;
+  }
+}
 
 class Registro_ {
   #titulo;
@@ -22,13 +37,13 @@ class Registro_ {
   }
 
   ConstruirRegistro() {
-    this.#Registro = new CrearElementoHTML('DIV', null, ['registro']).returnElement();
-    let Titulo = new CrearElementoHTML_Text('P', '').returnElement();
-    // let Titulo = new CrearElementoHTML_Text('P', this.#titulo).returnElement(); //Este es el valor que debe ir
-    let InputTiempo = new CrearElementoHTML('INPUT', null, ['inputTiempo']).returnElement();
-    this.InputOptions = new CrearElementoHTML_Select(this.#Options, 'tipo').returnElement();
-    let BotonDesprotegerTiempo = new CrearElementoHTML('BUTTON').returnElement();
-    let BotonDesactivarRegistro = new CrearElementoHTML('BUTTON').returnElement();
+    this.#Registro = new CrearElementoHTML('DIV', null, ['registro']).getElement();
+    let Titulo = new CrearElementoHTML_Text('P', '').getElement();
+    // let Titulo = new CrearElementoHTML_Text('P', this.#titulo).getElement(); //Este es el valor que debe ir
+    let InputTiempo = new CrearElementoHTML('INPUT', null, ['inputTiempo']).getElement();
+    this.InputOptions = new CrearElementoHTML_Select(this.#Options, 'tipo').getElement();
+    let BotonDesprotegerTiempo = new CrearElementoHTML('BUTTON').getElement();
+    let BotonDesactivarRegistro = new CrearElementoHTML('BUTTON').getElement();
     BotonDesprotegerTiempo.innerHTML = 'Des';
     BotonDesactivarRegistro.innerHTML = 'Del';
 
@@ -72,10 +87,12 @@ class Registro_ {
     distribuirTiempo();
   }
   ProtegerRegistro() {
+    this.ObjetoInput.Input.classList.add('protegido');
     this.Protegido = true;
   }
 
   DesprotegerRegistro(e) {
+    this.ObjetoInput.Input.classList.remove('protegido');
     this.Protegido = false;
     distribuirTiempo();
   }
@@ -108,8 +125,6 @@ class InputTiempo_ {
     else if (id) this.Input = document.getElementById(id);
 
     this.Input.addEventListener('input', (e) => {
-      Retornar_Diferencia_Entre_Strings(this.ValorAnteriorEscritura, e.target.value);
-      //NOTE:
       this.verificarValor(e);
     });
 
@@ -150,25 +165,65 @@ class InputTiempo_ {
   }
 }
 
-const BotonCargar = document.getElementById('ButtonCargarRegistros');
-BotonCargar.addEventListener('click', () => {
-  let CantidadRegistros = window.prompt('¿Cúantos registros desea cargar?', 10);
-  if (Number.isInteger(parseFloat(CantidadRegistros))) {
-    CargarRegistros(CantidadRegistros);
-  }
+const Calendario = new AirDatepicker('#fechaParaRuta', datepickerOptions);
+
+Api.GetData(`../assets/rutas.json`).then((data) => {
+  add_RutasSelect(data.rutas_vigilancia);
 });
 
-function CargarRegistros(CantidadRegistros) {
-  const SectionRegistros = document.getElementById('Registros');
-  for (let i = 0; i < CantidadRegistros; i++) {
-    let registro = new Registro_(Proyecto[i], ['Hola mundo 1', 'Hola Mundo 2']);
-    Registros.push(registro);
-    SectionRegistros.appendChild(registro.GetRegistro());
+function add_RutasSelect(rutas) {
+  const select = document.getElementById('selectRuta');
+  select.appendChild(new CrearElementoHTML_Option('vacia', '', null, null, 'display: none').getElement());
+  rutas.forEach((ruta) => {
+    let option = new CrearElementoHTML_Option(ruta.id_ruta, ruta.nombre_ruta).getElement();
+    select.appendChild(option);
+  });
+}
+
+document.getElementById('ButtonAgregarRegistros').addEventListener('click', () => {
+  AgregarRuta();
+});
+
+function AgregarRuta() {
+  const SelectRuta = document.getElementById('selectRuta');
+  const FechaParaRuta = document.getElementById('fechaParaRuta');
+  if (SelectRuta.value != 'vacia' && FechaParaRuta.getAttribute('data-value') && FechaParaRuta.getAttribute('data-value') != 'undefined') {
+    ConstruirRuta(SelectRuta.value, FechaParaRuta.getAttribute('data-value'));
+    Calendario.clear();
+    SelectRuta.value = 'vacia';
+  } else if (SelectRuta.value == 'vacia' && (!FechaParaRuta.getAttribute('data-value') || FechaParaRuta.getAttribute('data-value') == 'undefined')) {
+    window.alert('Completa los campos');
+  } else if (SelectRuta.value == 'vacia') {
+    window.alert('Seleccione una ruta');
+  } else if (!FechaParaRuta.getAttribute('data-value') || FechaParaRuta.getAttribute('data-value') == 'undefined') {
+    window.alert('Seleccione una fecha');
   }
 }
 
-let InputTiempoCabecera = document.getElementById('InputTiempoGeneral');
-new InputTiempo_(null, InputTiempoCabecera, true);
+function ConstruirRuta(id_ruta, fecha) {
+  console.log(id_ruta, fecha);
+}
+
+// const BotonCargar = document.getElementById('ButtonCargarRegistros');
+// BotonCargar.addEventListener('click', () => {
+//   let CantidadRegistros = window.prompt('¿Cúantos registros desea cargar?', 10);
+//   if (Number.isInteger(parseFloat(CantidadRegistros))) {
+//     CargarRegistros(CantidadRegistros);
+//   }
+// });
+
+// function CargarRegistros(CantidadRegistros) {
+//   const SectionRegistros = document.getElementById('Registros');
+//   for (let i = 0; i < CantidadRegistros; i++) {
+//     let registro = new Registro_(Proyecto[i], ['Hola mundo 1', 'Hola Mundo 2']);
+//     Registros.push(registro);
+//     SectionRegistros.appendChild(registro.GetRegistro());
+//   }
+// }
+
+// let InputTiempoCabecera = document.getElementById('InputTiempoGeneral');
+// // new InputTiempo_(null, InputTiempoCabecera, true);
+// //NOTE: Ahora el input de tiempo se utiliza hasta que se construlla la ruta
 
 function Horas_a_Minutos(value) {
   let Horas_Minutos = value.split(':');
@@ -178,7 +233,6 @@ function Horas_a_Minutos(value) {
 function Minutos_a_Horas(value) {
   let hora = parseInt(value / 60);
   let minutos = value % 60;
-
   function formatear(valor) {
     return `${valor < 10 ? '0' + valor : valor}`;
   }
@@ -223,23 +277,10 @@ function distribuirTiempo() {
   return true;
 }
 
-function Retornar_Diferencia_Entre_Strings(First_String, Second_String) {
-  // //NOTE: Terminar
-  // console.log(First_String);
-  // console.log(Second_String);
-  // [...First_String].forEach((char, index) => {
-  //   if(char != )
-  // });
-}
-
 function Contar_Registros_Activos_Sin_Proteger() {
   let NumeroDeActivos = 0;
-
   Registros.forEach((element) => {
     if (element.Activo && !element.Protegido) NumeroDeActivos++;
   });
-
-  console.log(NumeroDeActivos);
-
   return NumeroDeActivos;
 }

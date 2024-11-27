@@ -10,11 +10,17 @@
   </head>
   <body>
     <main>
-      <section class="botonesCabecera">
-        <button id="ButtonCargarRegistros">>> Cargar</button>
-        <input type="text" id="InputTiempoGeneral" />
+      <section class="vigilancia_judicial">
+        <section class="vigilancia_judicial-cabecera">
+          <div class="vigilancia_titulo">Vigilancia judicial</div>
+          <div class="vigilancia_agregarRuta">
+            <input type="text" name="dateInput" id="fechaParaRuta" data-value="" autocomplete="off" readonly />
+            <select name="selectRuta" id="selectRuta"></select>
+            <button id="ButtonAgregarRegistros">Agregar</button>
+          </div>
+        </section>
+        <section class="Edid_Rutas" id="Edid_Rutas"></section>
       </section>
-      <section class="registro" id="Registros"></section>
     </main>
   </body>
 </html>

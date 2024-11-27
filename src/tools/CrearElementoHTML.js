@@ -6,7 +6,7 @@ export class CrearElementoHTML {
     if (style) this.elemento.style = style;
   }
 
-  returnElement() {
+  getElement() {
     return this.elemento;
   }
 }
@@ -39,15 +39,23 @@ export class CrearElementoHTML_Text extends CrearElementoHTML {
   }
 }
 
+export class CrearElementoHTML_Option extends CrearElementoHTML {
+  constructor(value, innerHTML, id, classList, style) {
+    super('OPTION', id, classList, style);
+    this.elemento.value = value;
+    this.elemento.innerHTML = innerHTML;
+  }
+}
+
 export class CrearElementoHTML_Select extends CrearElementoHTML {
   constructor(OptionList, name, id, classList, style) {
     super('SELECT', id, classList, style);
     this.elemento.name = name;
-    let PrimeraOpcion = new CrearElementoHTML('Option', null, null, 'display: none').returnElement();
+    let PrimeraOpcion = new CrearElementoHTML('Option', null, null, 'display: none').getElement();
     PrimeraOpcion.value = 'primeraOpcion';
     this.elemento.appendChild(PrimeraOpcion);
     OptionList.forEach((optionValue) => {
-      let option = new CrearElementoHTML('OPTION').returnElement();
+      let option = new CrearElementoHTML('OPTION').getElement();
       option.value = optionValue;
       option.innerHTML = optionValue;
       this.elemento.appendChild(option);
