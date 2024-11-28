@@ -8,16 +8,33 @@ import 'air-datepicker/air-datepicker.css';
 
 let Registros = [];
 let TiempoGeneral_Minutos = 0;
+let Rutas = [];
 const Api = new API();
 
 class Ruta_ {
-  id_ruta;
+  id;
   fecha;
+  nombre;
+  color;
+  JSON_Preregistros;
+  Preregistros_ = [];
+  plantillas;
   contenedor = document.getElementById('Edid_Rutas');
-  constructor(id_ruta, fecha) {
-    this.id_ruta = id_ruta;
+  constructor(id, fecha, nombre, color, preregistros, plantillas) {
+    this.id = id;
     this.fecha = fecha;
+    this.nombre = nombre;
+    this.color = color;
+    this.preregistros = preregistros;
+    this.plantillas = plantillas;
+    console.log('Nueva ruta');
+
+    // NOTE: Los pasos que siguen son construir la ruta, es decir desde el elemento HTML en adelante, modificar la construcción del registro para que se guarden
+    // en la lista de los Preregistros de la ruta y de hay se hagan los calculos pertinentes.
   }
+
+  construirRuta() {}
+  construirPreregistros() {}
 }
 
 class Registro_ {
@@ -201,7 +218,19 @@ function AgregarRuta() {
 }
 
 function ConstruirRuta(id_ruta, fecha) {
-  console.log(id_ruta, fecha);
+  let URL = `../assets/ruta_${id_ruta}.json`;
+  if (!Rutas.find((ruta) => ruta.id_ruta == id_ruta && ruta.fecha == fecha)) {
+    Api.GetData(URL)
+      .then((data) => {
+        const Ruta = new Ruta_(id_ruta, fecha);
+        Rutas.push(Ruta);
+      })
+      .catch((error) => {
+        console.log('Ha ocurrido un error en el llamado de la ruta', error);
+      });
+  } else {
+    alert('La ruta especificado ya existe con la fecha indicada');
+  }
 }
 
 // const BotonCargar = document.getElementById('ButtonCargarRegistros');

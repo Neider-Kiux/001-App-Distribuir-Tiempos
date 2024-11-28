@@ -1,0 +1,48 @@
+{
+  "id_ruta": 1001,
+  "nombre_ruta": "Primera ruta de vigilancia",
+  "color_ruta": 15642897,
+  "preregistros": [
+    {
+      "id": 525,
+      "titulo": "Primer preregistro",
+      "color": 4955184,
+      "proyecto": "Proyecto 1",
+      "estado": "Abierto"
+    },
+    {
+      "id": 625,
+      "titulo": "Segundo preregistro",
+      "color": 4955184,
+      "proyecto": "Proyecto 1",
+      "estado": "Abierto"
+    },
+    {
+      "id": 725,
+      "titulo": "Tercer preregistro",
+      "color": 4955184,
+      "proyecto": "Proyecto 2",
+      "estado": "Abierto"
+    },
+    {
+      "id": 825,
+      "titulo": "Cuarto preregistro",
+      "color": 4955184,
+      "proyecto": "Proyecto 2",
+      "estado": "Abierto"
+    },
+    {
+      "id": 925,
+      "titulo": "Quinto preregistro",
+      "color": 4955184,
+      "proyecto": "Proyecto 3",
+      "estado": "Abierto"
+    }
+  ],
+  "plantillas": [
+    "Revisión de documento",
+    "Estudio de mercado",
+    "Consulta externa",
+    "Ayuda mundial"
+  ]
+}

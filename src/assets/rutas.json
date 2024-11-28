@@ -1,0 +1,19 @@
+{
+  "rutas_vigilancia": [
+    {
+      "id_ruta": 1001,
+      "nombre_ruta": "Primera ruta de vigilancia",
+      "color_rgb_dc": 15642897
+    },
+    {
+      "id_ruta": 1003,
+      "nombre_ruta": "Segunda ruta de vigilancia",
+      "color_rgb_dc": 10420102
+    },
+    {
+      "id_ruta": 1005,
+      "nombre_ruta": "Tercera ruta de vigilancia",
+      "color_rgb_dc": 16187615
+    }
+  ]
+}
