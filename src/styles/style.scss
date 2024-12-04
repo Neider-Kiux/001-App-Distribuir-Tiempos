@@ -22,6 +22,21 @@ main {
     margin: auto;
     font-family: Open Sans, sans-serif;
 
+    button {
+      width: 7.625rem;
+      height: 1.875rem;
+      border-radius: .25rem;
+      text-align: center;
+      margin-left: auto;
+      background: linear-gradient(180deg, #eee, #fff);
+      border: solid 0.0625rem #cecece;
+    }
+
+    button:hover {
+      margin-left: auto;
+      background: linear-gradient(360deg, #eee, #fff);
+    }
+
     &-cabecera {
       .vigilancia {
         &_titulo {
@@ -51,7 +66,6 @@ main {
           }
 
           input,
-          button,
           select {
             border: solid 0.0625rem #cecece;
           }
@@ -63,18 +77,56 @@ main {
             margin-left: .5rem;
             border-radius: .5rem;
           }
+        }
+      }
+    }
 
-          button#ButtonAgregarRegistros {
-            @extend input#fechaParaRuta;
-            margin-left: auto;
-            background: linear-gradient(180deg, #eee, #fff);
+    &-Rutas {
+      .ruta {
+        font-size: 1rem;
+        margin-top: 0.0625rem;
+
+        .footerRuta,
+        .headerRuta {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          height: 1.375rem;
+          padding: 0 0.5rem;
+        }
+
+        .headerRuta {
+          .ruta_titulo {
+            display: inline-block;
           }
 
-          button#ButtonAgregarRegistros:hover {
-            margin-left: auto;
-            background: linear-gradient(360deg, #eee, #fff);
+          .sideHeaderRuta {
+            display: flex;
+            align-items: center;
+            width: 7.625rem;
+
+            img {
+              width: 1.2rem;
+              margin-right: 0.25rem;
+            }
+
+            .inputTiempoTotal {
+              width: 3.125rem;
+              height: 1.125rem;
+              margin-right: auto;
+            }
+
+          }
+
+        }
+
+        .footerRuta {
+          button {
+            height: 1.125rem;
+            padding: 0;
           }
         }
+
       }
     }
   }

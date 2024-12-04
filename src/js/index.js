@@ -1,10 +1,19 @@
 import '../styles/style.scss';
-import {CrearElementoHTML, CrearElementoHTML_Text, CrearElementoHTML_Select, CrearElementoHTML_Option} from '../tools/CrearElementoHTML.js';
+import {
+  CrearElementoHTML,
+  CrearElementoHTML_Text,
+  CrearElementoHTML_Select,
+  CrearElementoHTML_Option,
+  CrearElementoHTML_Input,
+  CrearElementoHTML_Imagen,
+} from '../tools/CrearElementoHTML.js';
 // import {Proyecto} from './proyectos';
 import {API} from '../tools/API.js';
 import AirDatepicker from 'air-datepicker';
 import {datepickerOptions} from '../tools/datepicker-options.js';
 import 'air-datepicker/air-datepicker.css';
+import '../img/unlink-svgrepo-com.svg';
+import {GetHSL} from '../tools/Color.js';
 
 let Registros = [];
 let TiempoGeneral_Minutos = 0;
@@ -19,22 +28,55 @@ class Ruta_ {
   JSON_Preregistros;
   Preregistros_ = [];
   plantillas;
-  contenedor = document.getElementById('Edid_Rutas');
+  InputTiempoTotal_;
+  InputCheckAsegurar;
+  tiempoTotalMinutos = 0;
+  #Ruta = new CrearElementoHTML('DIV', `Ruta_${Rutas.length + 1}`, 'ruta').getElement();
+  contenedor = document.getElementById('vigilancia_judicial-Rutas');
   constructor(id, fecha, nombre, color, preregistros, plantillas) {
     this.id = id;
     this.fecha = fecha;
     this.nombre = nombre;
     this.color = color;
-    this.preregistros = preregistros;
+    this.JSON_Preregistros = preregistros;
     this.plantillas = plantillas;
-    console.log('Nueva ruta');
+    this.InputTiempoTotal_ = new InputTiempo_(this, true, 'inputTiempoTotal');
+    this.InputCheckAsegurar = new CrearElementoHTML_Input('checkbox', null, null, null, null, 'Asegurar tiempo').getElement();
+    this.contenedor.appendChild(this.#Ruta);
+    this.construirRuta();
 
     // NOTE: Los pasos que siguen son construir la ruta, es decir desde el elemento HTML en adelante, modificar la construcción del registro para que se guarden
-    // en la lista de los Preregistros de la ruta y de hay se hagan los calculos pertinentes.
+    // en la lista de los Preregistros de la ruta y de hay se hagan los calculos pertinentes.  En los JSON esta la infomación para construir la ruta y sus preconceptos.
   }
 
-  construirRuta() {}
-  construirPreregistros() {}
+  construirRuta() {
+    const ColorHSL = GetHSL(this.color);
+    const background_color = `background-color: hsl(${ColorHSL[0]}, ${ColorHSL[1]}%, ${ColorHSL[2]}%);`;
+    const HeaderRuta = new CrearElementoHTML('DIV', null, 'headerRuta', background_color).getElement();
+    const FooterRuta = new CrearElementoHTML('DIV', null, 'footerRuta', background_color).getElement();
+    const ContainerPregistros = new CrearElementoHTML('DIV', null, 'containerPreregistros').getElement();
+    this.#Ruta.appendChild(HeaderRuta);
+    this.#Ruta.appendChild(ContainerPregistros);
+    this.#Ruta.appendChild(FooterRuta);
+
+    HeaderRuta.appendChild(new CrearElementoHTML_Text('P', this.nombre, null, 'ruta_titulo').getElement());
+    const sideHeaderRuta = new CrearElementoHTML('DIV', null, 'sideHeaderRuta').getElement();
+    sideHeaderRuta.appendChild(this.InputTiempoTotal_.Input);
+    sideHeaderRuta.appendChild(new CrearElementoHTML_Imagen('../img/unlink-svgrepo-com.svg', 'KIUX-Icon-blocked').getElement());
+    sideHeaderRuta.appendChild(this.InputCheckAsegurar);
+    HeaderRuta.appendChild(sideHeaderRuta);
+    const BtnTerminar = new CrearElementoHTML('BUTTON', 'BtnTerminarRuta', 'BtnTerminarRuta', null, 'Terminar').getElement();
+    BtnTerminar.addEventListener('click', () => {
+      this.terminar();
+    });
+    FooterRuta.appendChild(BtnTerminar);
+
+    this.construirPreregistros(ContainerPregistros);
+  }
+  construirPreregistros(contenedor) {}
+  terminar() {
+    console.log(this.InputCheckAsegurar);
+  }
 }
 
 class Registro_ {
@@ -46,6 +88,7 @@ class Registro_ {
   TiempoAsignado = 0;
   ObjetoInput;
   InputOptions;
+  Ruta_;
   constructor(titulo, Options) {
     this.#titulo = titulo;
     this.#Options = Options;
@@ -84,8 +127,7 @@ class Registro_ {
     this.#Registro.appendChild(BotonDesprotegerTiempo);
     this.#Registro.appendChild(BotonDesactivarRegistro);
 
-    this.ObjetoInput = new InputTiempo_(null, InputTiempo);
-    this.ObjetoInput.RegistroContenedor = this;
+    this.ObjetoInput = new InputTiempo_(null, InputTiempo, this);
     this.ObjetoInput.Input.disabled = true;
   }
 
@@ -134,12 +176,16 @@ class InputTiempo_ {
   Input;
   ValorAnterior = '';
   ValorAnteriorEscritura = '';
-  RegistroContenedor;
+  Registro_;
+  Ruta_;
   tiempoRegistradoMinutos = 0;
   AnteriorTiempoAsignado = 0;
-  constructor(id, Elemento, InputCabecera) {
-    if (Elemento) this.Input = Elemento;
-    else if (id) this.Input = document.getElementById(id);
+  constructor(Contenedor_, InputCabecera, classList) {
+    // if (Elemento) this.Input = Elemento;
+    // else if (id) this.Input = document.getElementById(id);
+    if (!InputCabecera) this.Registro_ = Contenedor_;
+    else this.Ruta_ = Contenedor_;
+    this.Input = new CrearElementoHTML_Input('text', null, classList).getElement();
 
     this.Input.addEventListener('input', (e) => {
       this.verificarValor(e);
@@ -180,6 +226,10 @@ class InputTiempo_ {
       e.target.value = this.ValorAnteriorEscritura;
     }
   }
+
+  getInput() {
+    return this.Input;
+  }
 }
 
 const Calendario = new AirDatepicker('#fechaParaRuta', datepickerOptions);
@@ -190,9 +240,9 @@ Api.GetData(`../assets/rutas.json`).then((data) => {
 
 function add_RutasSelect(rutas) {
   const select = document.getElementById('selectRuta');
-  select.appendChild(new CrearElementoHTML_Option('vacia', '', null, null, 'display: none').getElement());
+  //select.appendChild(new CrearElementoHTML_Option('vacia', null, null, 'display: none', '').getElement()); // [x] <-- Descomentar esta linea
   rutas.forEach((ruta) => {
-    let option = new CrearElementoHTML_Option(ruta.id_ruta, ruta.nombre_ruta).getElement();
+    let option = new CrearElementoHTML_Option(ruta.id_ruta, null, null, null, ruta.nombre_ruta).getElement();
     select.appendChild(option);
   });
 }
@@ -200,6 +250,14 @@ function add_RutasSelect(rutas) {
 document.getElementById('ButtonAgregarRegistros').addEventListener('click', () => {
   AgregarRuta();
 });
+
+//[x] Retirar estas lineas -->
+const FechaParaRuta = document.getElementById('fechaParaRuta');
+FechaParaRuta.setAttribute('data-value', '2024-12-04');
+FechaParaRuta.value = '2024-12-04';
+const SelectRuta = document.getElementById('selectRuta');
+SelectRuta.value = 1001;
+//[x] <--
 
 function AgregarRuta() {
   const SelectRuta = document.getElementById('selectRuta');
@@ -219,10 +277,10 @@ function AgregarRuta() {
 
 function ConstruirRuta(id_ruta, fecha) {
   let URL = `../assets/ruta_${id_ruta}.json`;
-  if (!Rutas.find((ruta) => ruta.id_ruta == id_ruta && ruta.fecha == fecha)) {
+  if (!Rutas.find((ruta) => ruta.id == id_ruta && ruta.fecha == fecha)) {
     Api.GetData(URL)
       .then((data) => {
-        const Ruta = new Ruta_(id_ruta, fecha);
+        const Ruta = new Ruta_(data.id, fecha, data.nombre, data.color, data.preregistros, data.plantillas);
         Rutas.push(Ruta);
       })
       .catch((error) => {
