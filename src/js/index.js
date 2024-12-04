@@ -6,14 +6,18 @@ import {
   CrearElementoHTML_Option,
   CrearElementoHTML_Input,
   CrearElementoHTML_Imagen,
+  CrearElementoHTML_Button,
 } from '../tools/CrearElementoHTML.js';
 // import {Proyecto} from './proyectos';
 import {API} from '../tools/API.js';
 import AirDatepicker from 'air-datepicker';
 import {datepickerOptions} from '../tools/datepicker-options.js';
+import {GetHSL} from '../tools/Color.js';
 import 'air-datepicker/air-datepicker.css';
 import '../img/unlink-svgrepo-com.svg';
-import {GetHSL} from '../tools/Color.js';
+import '../img/unlink-svgrepo-com_dark.svg';
+import '../img/lock-closed-svgrepo-com.svg';
+import '../img/delete-1-svgrepo-com.svg';
 
 let Registros = [];
 let TiempoGeneral_Minutos = 0;
@@ -51,9 +55,10 @@ class Ruta_ {
 
   construirRuta() {
     const ColorHSL = GetHSL(this.color);
-    const background_color = `background-color: hsl(${ColorHSL[0]}, ${ColorHSL[1]}%, ${ColorHSL[2]}%);`;
-    const HeaderRuta = new CrearElementoHTML('DIV', null, 'headerRuta', background_color).getElement();
-    const FooterRuta = new CrearElementoHTML('DIV', null, 'footerRuta', background_color).getElement();
+    const background_color = `hsl(${ColorHSL[0]}, ${ColorHSL[1]}%, ${ColorHSL[2]}%);`;
+    this.#Ruta.style = `border: solid 1px ${background_color};`;
+    const HeaderRuta = new CrearElementoHTML('DIV', null, 'headerRuta', `background-color:  ${background_color};`).getElement();
+    const FooterRuta = new CrearElementoHTML('DIV', null, 'footerRuta', `background-color:  ${background_color};`).getElement();
     const ContainerPregistros = new CrearElementoHTML('DIV', null, 'containerPreregistros').getElement();
     this.#Ruta.appendChild(HeaderRuta);
     this.#Ruta.appendChild(ContainerPregistros);
@@ -65,7 +70,7 @@ class Ruta_ {
     sideHeaderRuta.appendChild(new CrearElementoHTML_Imagen('../img/unlink-svgrepo-com.svg', 'KIUX-Icon-blocked').getElement());
     sideHeaderRuta.appendChild(this.InputCheckAsegurar);
     HeaderRuta.appendChild(sideHeaderRuta);
-    const BtnTerminar = new CrearElementoHTML('BUTTON', 'BtnTerminarRuta', 'BtnTerminarRuta', null, 'Terminar').getElement();
+    const BtnTerminar = new CrearElementoHTML_Button(false, 'BtnTerminarRuta', 'BtnTerminarRuta', null, 'Terminar').getElement();
     BtnTerminar.addEventListener('click', () => {
       this.terminar();
     });
@@ -73,9 +78,90 @@ class Ruta_ {
 
     this.construirPreregistros(ContainerPregistros);
   }
-  construirPreregistros(contenedor) {}
+  construirPreregistros(contenedor) {
+    console.log(this.JSON_Preregistros);
+    this.JSON_Preregistros.forEach((preregistro) => {
+      console.log(preregistro);
+      const Preregistro = new Preregistro_(preregistro.id, preregistro.titulo, preregistro.color, preregistro.idioma, preregistro.proyecto, preregistro.estado, this);
+      contenedor.appendChild(Preregistro.GetPreregistro());
+      this.Preregistros_.push(Preregistro);
+    });
+  }
   terminar() {
     console.log(this.InputCheckAsegurar);
+  }
+}
+
+class Preregistro_ {
+  #Preregistro = new CrearElementoHTML('DIV', null, 'preregistro').getElement();
+  #Ruta_;
+  id;
+  titulo;
+  color;
+  idioma;
+  proyecto;
+  estado;
+  descripcionPreregistro;
+  selectPlantillas;
+  InputTiempoPreregistro_;
+  botonAsegurar;
+  botonDeshabilitar;
+  constructor(id, titulo, color, idioma, proyecto, estado, ruta) {
+    this.id = id;
+    this.titulo = titulo;
+    this.color = color;
+    this.idioma = idioma;
+    this.proyecto = proyecto;
+    this.estado = estado;
+    this.#Ruta_ = ruta;
+    this.construirPreregistro();
+  }
+
+  construirPreregistro() {
+    const ColorHSL = GetHSL(this.color);
+    const background_color = `background-color: hsl(${ColorHSL[0]}, ${ColorHSL[1]}%, ${ColorHSL[2]}%);`;
+    const background_color_2 = `background-color: hsl(${ColorHSL[0]}, ${ColorHSL[1]}%, 95%);`;
+    const headerPreregistro = new CrearElementoHTML('Div', null, 'headerPreregistro', background_color).getElement();
+    const contentPreregistro = new CrearElementoHTML('DIV', null, 'contentPreregistro', background_color_2).getElement();
+    const botonesPreregistro = new CrearElementoHTML('DIV', null, 'botonesPreregistro').getElement();
+
+    headerPreregistro.appendChild(new CrearElementoHTML('DIV', null, 'headerPreregistro_idioma', null, this.idioma).getElement());
+    headerPreregistro.appendChild(new CrearElementoHTML('DIV', null, 'headerPreregistro_titulo', null, this.titulo).getElement());
+
+    this.descripcionPreregistro = new CrearElementoHTML_Text(
+      'P',
+      'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat inventore laborum',
+      null,
+      'descripcionPreregistro',
+    ).getElement();
+    this.selectPlantillas = new CrearElementoHTML_Select(this.#Ruta_.plantillas, 'plantillas', null, 'selectPlantillas').getElement();
+    this.InputTiempoPreregistro_ = new InputTiempo_(this, false, 'inputTiempoPreregistro');
+    this.botonAsegurar = new CrearElementoHTML_Button(true, 'BotonAsegurarTiempo', 'botonAsegurarTiempo disabled').getElement();
+    this.botonDeshabilitar = new CrearElementoHTML_Button(true, 'BotonDeshabilitar', 'botonDeshabilitar disabled').getElement();
+    this.botonAsegurar.appendChild(new CrearElementoHTML_Imagen('../img/unlink-svgrepo-com_dark.svg').getElement());
+    this.botonDeshabilitar.appendChild(new CrearElementoHTML_Imagen('../img/delete-1-svgrepo-com.svg').getElement());
+
+    botonesPreregistro.appendChild(this.InputTiempoPreregistro_.Input);
+    botonesPreregistro.appendChild(this.botonAsegurar);
+    botonesPreregistro.appendChild(this.botonDeshabilitar);
+
+    const Descripcion_Candado = new CrearElementoHTML('DIV', null, 'descripcion_candado').getElement();
+    Descripcion_Candado.appendChild(new CrearElementoHTML_Imagen('../img/lock-closed-svgrepo-com.svg', 'candado', null, 'img_candado').getElement());
+    Descripcion_Candado.appendChild(this.descripcionPreregistro);
+
+    const Botones_Plantillas = new CrearElementoHTML('DIV', null, 'botones_plantillas').getElement();
+    Botones_Plantillas.appendChild(this.selectPlantillas);
+    Botones_Plantillas.appendChild(botonesPreregistro);
+
+    contentPreregistro.appendChild(Descripcion_Candado);
+    contentPreregistro.appendChild(Botones_Plantillas);
+
+    this.#Preregistro.appendChild(headerPreregistro);
+    this.#Preregistro.appendChild(contentPreregistro);
+  }
+
+  GetPreregistro() {
+    return this.#Preregistro;
   }
 }
 

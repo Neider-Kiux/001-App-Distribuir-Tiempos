@@ -70,3 +70,10 @@ export class CrearElementoHTML_Input extends CrearElementoHTML {
     this.elemento.type = type;
   }
 }
+
+export class CrearElementoHTML_Button extends CrearElementoHTML {
+  constructor(disabled, id, classList, style, innerHTML, title) {
+    super('BUTTON', id, classList, style, innerHTML, title);
+    if (disabled) this.elemento.disabled = true;
+  }
+}
