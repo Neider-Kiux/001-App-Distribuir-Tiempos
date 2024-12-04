@@ -79,9 +79,7 @@ class Ruta_ {
     this.construirPreregistros(ContainerPregistros);
   }
   construirPreregistros(contenedor) {
-    console.log(this.JSON_Preregistros);
     this.JSON_Preregistros.forEach((preregistro) => {
-      console.log(preregistro);
       const Preregistro = new Preregistro_(preregistro.id, preregistro.titulo, preregistro.color, preregistro.idioma, preregistro.proyecto, preregistro.estado, this);
       contenedor.appendChild(Preregistro.GetPreregistro());
       this.Preregistros_.push(Preregistro);
@@ -95,6 +93,8 @@ class Ruta_ {
 class Preregistro_ {
   #Preregistro = new CrearElementoHTML('DIV', null, 'preregistro').getElement();
   #Ruta_;
+  Activo = false;
+  Protegido = false;
   id;
   titulo;
   color;
@@ -104,7 +104,7 @@ class Preregistro_ {
   descripcionPreregistro;
   selectPlantillas;
   InputTiempoPreregistro_;
-  botonAsegurar;
+  botonDesasegurar;
   botonDeshabilitar;
   constructor(id, titulo, color, idioma, proyecto, estado, ruta) {
     this.id = id;
@@ -128,21 +128,16 @@ class Preregistro_ {
     headerPreregistro.appendChild(new CrearElementoHTML('DIV', null, 'headerPreregistro_idioma', null, this.idioma).getElement());
     headerPreregistro.appendChild(new CrearElementoHTML('DIV', null, 'headerPreregistro_titulo', null, this.titulo).getElement());
 
-    this.descripcionPreregistro = new CrearElementoHTML_Text(
-      'P',
-      'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat inventore laborum',
-      null,
-      'descripcionPreregistro',
-    ).getElement();
+    this.descripcionPreregistro = new CrearElementoHTML_Text('P', '', null, 'descripcionPreregistro').getElement();
     this.selectPlantillas = new CrearElementoHTML_Select(this.#Ruta_.plantillas, 'plantillas', null, 'selectPlantillas').getElement();
     this.InputTiempoPreregistro_ = new InputTiempo_(this, false, 'inputTiempoPreregistro');
-    this.botonAsegurar = new CrearElementoHTML_Button(true, 'BotonAsegurarTiempo', 'botonAsegurarTiempo disabled').getElement();
-    this.botonDeshabilitar = new CrearElementoHTML_Button(true, 'BotonDeshabilitar', 'botonDeshabilitar disabled').getElement();
-    this.botonAsegurar.appendChild(new CrearElementoHTML_Imagen('../img/unlink-svgrepo-com_dark.svg').getElement());
+    this.botonDesasegurar = new CrearElementoHTML_Button(false, 'BotonDesasegurarTiempo', 'botonDesasegurarTiempo').getElement();
+    this.botonDeshabilitar = new CrearElementoHTML_Button(true, 'BotonDeshabilitar', 'botonDeshabilitar').getElement();
+    this.botonDesasegurar.appendChild(new CrearElementoHTML_Imagen('../img/unlink-svgrepo-com_dark.svg').getElement());
     this.botonDeshabilitar.appendChild(new CrearElementoHTML_Imagen('../img/delete-1-svgrepo-com.svg').getElement());
 
     botonesPreregistro.appendChild(this.InputTiempoPreregistro_.Input);
-    botonesPreregistro.appendChild(this.botonAsegurar);
+    botonesPreregistro.appendChild(this.botonDesasegurar);
     botonesPreregistro.appendChild(this.botonDeshabilitar);
 
     const Descripcion_Candado = new CrearElementoHTML('DIV', null, 'descripcion_candado').getElement();
@@ -158,19 +153,28 @@ class Preregistro_ {
 
     this.#Preregistro.appendChild(headerPreregistro);
     this.#Preregistro.appendChild(contentPreregistro);
+
+    this.botonDesasegurar.addEventListener('click', () => {
+      this.DesasegurarTiempo();
+    });
   }
 
   GetPreregistro() {
     return this.#Preregistro;
   }
+
+  DesasegurarTiempo() {
+    console.log(this.#Ruta_);
+  }
+
+  //NOTE: Estas creando la función para activar el registro, primero debe aparecer desactivado, luego se debe confirmar que se ingrese adecuadamente el valor en los inputs de los registros.
+  //Para activar el registro se debe modificar el valor de la descripción.
 }
 
 class Registro_ {
   #titulo;
   #Options;
   #Registro;
-  Activo = false;
-  Protegido = false;
   TiempoAsignado = 0;
   ObjetoInput;
   InputOptions;
@@ -267,8 +271,6 @@ class InputTiempo_ {
   tiempoRegistradoMinutos = 0;
   AnteriorTiempoAsignado = 0;
   constructor(Contenedor_, InputCabecera, classList) {
-    // if (Elemento) this.Input = Elemento;
-    // else if (id) this.Input = document.getElementById(id);
     if (!InputCabecera) this.Registro_ = Contenedor_;
     else this.Ruta_ = Contenedor_;
     this.Input = new CrearElementoHTML_Input('text', null, classList).getElement();
@@ -280,7 +282,8 @@ class InputTiempo_ {
     this.Input.addEventListener('keypress', (e) => {
       if (e.key == 'Enter') {
         if (InputCabecera) {
-          TiempoGeneral_Minutos = Horas_a_Minutos(this.Input.value);
+          // TiempoGeneral_Minutos = Horas_a_Minutos(this.Input.value);
+          this.Ruta_.tiempoTotalMinutos = Horas_a_Minutos(this.Input.value);
         } else {
           this.AnteriorTiempoAsignado = this.RegistroContenedor.TiempoAsignado;
           console.log(this.AnteriorTiempoAsignado);
