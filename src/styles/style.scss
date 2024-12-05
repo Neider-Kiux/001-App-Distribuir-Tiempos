@@ -37,6 +37,8 @@ main {
       background: linear-gradient(360deg, #eee, #fff);
     }
 
+
+
     &-cabecera {
       .vigilancia {
         &_titulo {
@@ -63,6 +65,7 @@ main {
             height: 1.875rem;
             border-radius: .25rem;
             text-align: center;
+            cursor: pointer;
           }
 
           input,
@@ -82,9 +85,27 @@ main {
     }
 
     &-Rutas {
+
+      input:read-only {
+        background-color: #aaa;
+      }
+
+      input:read-only.asegurado {
+        background-color: #ccc;
+        color: var(--red);
+      }
+
+      button:disabled {
+        background: linear-gradient(180deg, #aaa, #ccc);
+      }
+
+      p.disabled {
+        color: #aaa;
+      }
+
       .ruta {
         font-size: 1rem;
-        margin-top: 0.0625rem;
+        margin-top: .25rem;
 
         .inputTiempoTotal,
         .inputTiempoPreregistro {
@@ -208,9 +229,7 @@ main {
 
                   }
 
-                  button:disabled {
-                    background: linear-gradient(180deg, #aaa, #ccc);
-                  }
+
                 }
               }
             }
