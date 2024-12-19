@@ -12,6 +12,7 @@ import {API} from '../tools/API.js';
 import AirDatepicker from 'air-datepicker';
 import {datepickerOptions} from '../tools/datepicker-options.js';
 import {GetHSL} from '../tools/Color.js';
+import {DialogoEditar_} from './dialogo_edtitar.js';
 import 'air-datepicker/air-datepicker.css';
 import '../img/unlink-svgrepo-com.svg';
 import '../img/unlink-svgrepo-com_dark.svg';
@@ -237,6 +238,9 @@ class Preregistro_ {
     this.InputTiempoPreregistro_.Input.disabled = true;
 
     this.descripcionPreregistro.textContent = '';
+    this.descripcionPreregistro.addEventListener('click', () => {
+      new DialogoEditar_(this);
+    });
 
     const observerDescripcion = new MutationObserver((mutationsList) => {
       mutationsList.forEach((mutation) => {
@@ -319,7 +323,7 @@ class Preregistro_ {
   }
 }
 
-class InputTiempo_ {
+export class InputTiempo_ {
   Input;
   ValorAnterior = '';
   ValorAnteriorEscritura = '';
