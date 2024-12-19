@@ -71,6 +71,13 @@ class Ruta_ {
     FooterRuta.appendChild(BtnTerminar);
 
     this.construirPreregistros(ContainerPregistros);
+    this.InputCheckAsegurar.addEventListener('change', (e) => {
+      if (e.target.checked) {
+        this.ActivarTiempoFijo();
+      } else {
+        this.DesactivarTiempoFijo();
+      }
+    });
   }
   construirPreregistros(contenedor) {
     this.JSON_Preregistros.forEach((preregistro) => {
@@ -122,12 +129,43 @@ class Ruta_ {
     return true;
   }
 
+  SumarTiempos() {
+    this.tiempoTotalMinutos = 0;
+    this.Preregistros_.forEach((preregistro) => {
+      if (preregistro.Activo) {
+        this.tiempoTotalMinutos += preregistro.TiempoAsignado;
+      }
+    });
+    this.InputTiempoTotal_.Input.value = Minutos_a_Horas(this.tiempoTotalMinutos);
+    return true;
+  }
+
+  Distribuir_Sumar_Tiempo() {
+    if (this.InputCheckAsegurar.checked) {
+      return this.DistribuirTiempo();
+    } else {
+      return this.SumarTiempos();
+    }
+  }
+
   Contar_Registros_Activos_Sin_Proteger() {
     let NumeroDeActivos = 0;
     this.Preregistros_.forEach((element) => {
       if (element.Activo && !element.Asegurado) NumeroDeActivos++;
     });
     return NumeroDeActivos;
+  }
+
+  ActivarTiempoFijo() {}
+  DesactivarTiempoFijo() {
+    this.Preregistros_.forEach((preregistro) => {
+      if (preregistro.Asegurado) {
+        preregistro.InputTiempoPreregistro_.Input.classList.remove('asegurado');
+        preregistro.Asegurado = false;
+        preregistro.botonDesasegurar_Asegurar.disabled = true;
+        preregistro.InputTiempoPreregistro_.Input.disabled = false;
+      }
+    });
   }
 }
 
@@ -207,7 +245,7 @@ class Preregistro_ {
         }
       });
     });
-    //FIXME:Cuando se utiliza la misma platilla no se activa el Preregistro.
+
     observerDescripcion.observe(this.descripcionPreregistro, {childList: true, subtree: false, characterData: true, characterDataOldValue: true});
 
     this.botonDesasegurar_Asegurar.addEventListener('click', () => {
@@ -228,16 +266,20 @@ class Preregistro_ {
   }
 
   Desasegurar_AsegurarTiempo() {
-    if (!this.InputTiempoPreregistro_.Input.classList.contains('asegurado') && !this.Asegurado) {
-      this.InputTiempoPreregistro_.Input.classList.add('asegurado');
-      this.Asegurado = true;
-      this.InputTiempoPreregistro_.Input.disabled = true;
-    } else {
-      this.InputTiempoPreregistro_.Input.classList.remove('asegurado');
-      this.Asegurado = false;
-      this.InputTiempoPreregistro_.Input.disabled = false;
+    if (this.Ruta_.InputCheckAsegurar.checked) {
+      if (!this.InputTiempoPreregistro_.Input.classList.contains('asegurado') && !this.Asegurado) {
+        this.InputTiempoPreregistro_.Input.classList.add('asegurado');
+        this.Asegurado = true;
+        this.botonDesasegurar_Asegurar.disabled = false;
+        this.InputTiempoPreregistro_.Input.disabled = true;
+      } else {
+        this.InputTiempoPreregistro_.Input.classList.remove('asegurado');
+        this.Asegurado = false;
+        this.botonDesasegurar_Asegurar.disabled = true;
+        this.InputTiempoPreregistro_.Input.disabled = false;
+      }
+      this.Ruta_.Distribuir_Sumar_Tiempo();
     }
-    this.Ruta_.DistribuirTiempo();
   }
 
   DesactivarPreregistro() {
@@ -250,16 +292,15 @@ class Preregistro_ {
     this.descripcionPreregistro.textContent = '';
     this.selectPlantillas.value = 'primeraOpcion';
     this.TiempoAsignado = 0;
-    this.Ruta_.DistribuirTiempo();
+    this.Ruta_.Distribuir_Sumar_Tiempo();
   }
 
   ActivarPreregistro() {
     this.Activo = true;
-    this.botonDesasegurar_Asegurar.disabled = false;
     this.botonDeshabilitar.disabled = false;
     this.InputTiempoPreregistro_.Input.disabled = false;
     this.descripcionPreregistro.classList.remove('disabled');
-    this.Ruta_.DistribuirTiempo();
+    this.Ruta_.Distribuir_Sumar_Tiempo();
   }
 
   seleccionarPlantilla(e) {
@@ -304,7 +345,7 @@ class InputTiempo_ {
           this.Preregistro_.TiempoAsignado = Horas_a_Minutos(this.Input.value);
           this.Preregistro_.Desasegurar_AsegurarTiempo();
         }
-        if (this.Preregistro_ ? this.Preregistro_.Ruta_.DistribuirTiempo() : this.Ruta_.DistribuirTiempo()) {
+        if (this.Preregistro_ ? this.Preregistro_.Ruta_.Distribuir_Sumar_Tiempo() : this.Ruta_.Distribuir_Sumar_Tiempo()) {
           if (!InputCabecera) this.AnteriorTiempoAsignado = this.Preregistro_.TiempoAsignado;
           this.Input.value = Minutos_a_Horas(Horas_a_Minutos(this.Input.value));
           this.ValorAnterior = this.Input.value;
@@ -363,13 +404,13 @@ document.getElementById('ButtonAgregarRegistros').addEventListener('click', () =
   AgregarRuta();
 });
 
-//[x] Retirar estas lineas -->
+//[x] Retirar estas lineas ~~>
 const FechaParaRuta = document.getElementById('fechaParaRuta');
 FechaParaRuta.setAttribute('data-value', '2024-12-04');
 FechaParaRuta.value = '2024-12-04';
 const SelectRuta = document.getElementById('selectRuta');
 SelectRuta.value = 1001;
-//[x] <--
+//[x] <~~
 
 function AgregarRuta() {
   const SelectRuta = document.getElementById('selectRuta');
@@ -415,95 +456,4 @@ function Minutos_a_Horas(value) {
     return `${valor < 10 ? '0' + valor : valor}`;
   }
   return `${formatear(hora)}:${formatear(minutos)}`;
-}
-
-class Registro_ {
-  #titulo;
-  #Options;
-  #Registro;
-  TiempoAsignado = 0;
-  ObjetoInput;
-  InputOptions;
-  Ruta_;
-  constructor(titulo, Options) {
-    this.#titulo = titulo;
-    this.#Options = Options;
-
-    this.ConstruirRegistro();
-  }
-
-  ConstruirRegistro() {
-    this.#Registro = new CrearElementoHTML('DIV', null, ['registro']).getElement();
-    let Titulo = new CrearElementoHTML_Text('P', '').getElement();
-    // let Titulo = new CrearElementoHTML_Text('P', this.#titulo).getElement(); //Este es el valor que debe ir
-    let InputTiempo = new CrearElementoHTML('INPUT', null, ['inputTiempo']).getElement();
-    this.InputOptions = new CrearElementoHTML_Select(this.#Options, 'tipo').getElement();
-    let BotonDesprotegerTiempo = new CrearElementoHTML('BUTTON').getElement();
-    let BotonDesactivarRegistro = new CrearElementoHTML('BUTTON').getElement();
-    BotonDesprotegerTiempo.innerHTML = 'Des';
-    BotonDesactivarRegistro.innerHTML = 'Del';
-
-    this.InputOptions.addEventListener('change', (e) => {
-      if (e.target.value) {
-        this.ActivarRegistro();
-      }
-    });
-
-    BotonDesprotegerTiempo.addEventListener('click', (e) => {
-      this.DesprotegerRegistro(e);
-    });
-
-    BotonDesactivarRegistro.addEventListener('click', (e) => {
-      this.DesactivarRegistro();
-    });
-
-    this.#Registro.appendChild(Titulo);
-    this.#Registro.appendChild(InputTiempo);
-    this.#Registro.appendChild(this.InputOptions);
-    this.#Registro.appendChild(BotonDesprotegerTiempo);
-    this.#Registro.appendChild(BotonDesactivarRegistro);
-
-    this.ObjetoInput = new InputTiempo_(null, InputTiempo, this);
-    this.ObjetoInput.Input.disabled = true;
-  }
-
-  IngresarValorTiempo(tiempoMinutos) {
-    this.TiempoAsignado = tiempoMinutos;
-    this.ObjetoInput.Input.value = Minutos_a_Horas(tiempoMinutos);
-  }
-
-  GetRegistro() {
-    return this.#Registro;
-  }
-
-  ActivarRegistro() {
-    this.ObjetoInput.Input.disabled = false;
-    this.Activo = true;
-    distribuirTiempo();
-  }
-  ProtegerRegistro() {
-    this.ObjetoInput.Input.classList.add('protegido');
-    this.Protegido = true;
-  }
-
-  DesprotegerRegistro(e) {
-    this.ObjetoInput.Input.classList.remove('protegido');
-    this.Protegido = false;
-    distribuirTiempo();
-  }
-
-  DesactivarRegistro() {
-    this.Activo = false;
-    this.Protegido = false;
-    this.InputOptions.value = 'primeraOpcion';
-    this.ObjetoInput.Input.value = '';
-    this.ObjetoInput.Input.disabled = true;
-    this.TiempoAsignado = 0;
-    this.ObjetoInput.AnteriorTiempoAsignado = 0;
-    this.ObjetoInput.tiempoRegistradoMinutos = 0;
-    this.ObjetoInput.ValorAnteriorEscritura = 0;
-    this.ObjetoInput.ValorAnterior = 0;
-
-    distribuirTiempo();
-  }
 }
