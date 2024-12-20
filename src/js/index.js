@@ -18,6 +18,7 @@ import '../img/unlink-svgrepo-com.svg';
 import '../img/unlink-svgrepo-com_dark.svg';
 import '../img/lock-closed-svgrepo-com.svg';
 import '../img/delete-1-svgrepo-com.svg';
+import '../img/sprite.svg';
 
 let Rutas = [];
 const Api = new API();
@@ -42,13 +43,14 @@ class Ruta_ {
     this.color = color;
     this.JSON_Preregistros = preregistros;
     this.plantillas = plantillas;
-    this.InputTiempoTotal_ = new InputTiempo_(this, true, 'inputTiempoTotal');
+    this.InputTiempoTotal_ = new InputTiempo_(this, 'inputTiempoTotal', true);
     this.InputCheckAsegurar = new CrearElementoHTML_Input('checkbox', null, null, null, null, 'Asegurar tiempo').getElement();
     this.contenedor.appendChild(this.#Ruta);
     this.construirRuta();
   }
 
   construirRuta() {
+    this.InputTiempoTotal_.Input.readOnly = true;
     const ColorHSL = GetHSL(this.color);
     const background_color = `hsl(${ColorHSL[0]}, ${ColorHSL[1]}%, ${ColorHSL[2]}%);`;
     this.#Ruta.style = `border: solid 1px ${background_color};`;
@@ -157,8 +159,11 @@ class Ruta_ {
     return NumeroDeActivos;
   }
 
-  ActivarTiempoFijo() {}
+  ActivarTiempoFijo() {
+    this.InputTiempoTotal_.Input.readOnly = false;
+  }
   DesactivarTiempoFijo() {
+    this.InputTiempoTotal_.Input.readOnly = true;
     this.Preregistros_.forEach((preregistro) => {
       if (preregistro.Asegurado) {
         preregistro.InputTiempoPreregistro_.Input.classList.remove('asegurado');
@@ -211,7 +216,7 @@ class Preregistro_ {
 
     this.descripcionPreregistro = new CrearElementoHTML_Text('P', '', null, 'descripcionPreregistro').getElement();
     this.selectPlantillas = new CrearElementoHTML_Select(this.Ruta_.plantillas, 'plantillas', null, 'selectPlantillas').getElement();
-    this.InputTiempoPreregistro_ = new InputTiempo_(this, false, 'inputTiempoPreregistro');
+    this.InputTiempoPreregistro_ = new InputTiempo_(this, 'inputTiempoPreregistro');
     this.botonDesasegurar_Asegurar = new CrearElementoHTML_Button(true, 'botonDesasegurar_AsegurarTiempo', 'botonDesasegurar_AsegurarTiempo').getElement();
     this.botonDeshabilitar = new CrearElementoHTML_Button(true, 'BotonDeshabilitar', 'botonDeshabilitar').getElement();
     this.botonDesasegurar_Asegurar.appendChild(new CrearElementoHTML_Imagen('../img/unlink-svgrepo-com_dark.svg').getElement());
@@ -329,37 +334,43 @@ export class InputTiempo_ {
   ValorAnteriorEscritura = '';
   Preregistro_;
   Ruta_;
+  VentanaEditar_;
   tiempoRegistradoMinutos = 0;
   AnteriorTiempoAsignado = 0;
-  constructor(Contenedor_, InputCabecera, classList) {
-    if (!InputCabecera) this.Preregistro_ = Contenedor_;
-    else this.Ruta_ = Contenedor_;
+  constructor(Contenedor_, classList, InputCabecera, InputVentanaEditar) {
+    if (InputVentanaEditar) this.VentanaEditar_ = Contenedor_;
+    else if (InputCabecera) this.Ruta_ = Contenedor_;
+    else this.Preregistro_ = Contenedor_;
     this.Input = new CrearElementoHTML_Input('text', null, classList).getElement();
 
     this.Input.addEventListener('input', (e) => {
       this.verificarValor(e);
     });
-
     this.Input.addEventListener('keypress', (e) => {
       if (e.key == 'Enter') {
-        if (InputCabecera) {
-          this.Ruta_.tiempoTotalMinutos = Horas_a_Minutos(this.Input.value);
+        if (InputVentanaEditar) {
+          this.VentanaEditar_.TiempoAsignado = Horas_a_Minutos(this.Input.value);
+          this.Input.value = Minutos_a_Horas(this.VentanaEditar_.TiempoAsignado);
         } else {
-          this.AnteriorTiempoAsignado = this.Preregistro_.TiempoAsignado;
-          this.Preregistro_.TiempoAsignado = Horas_a_Minutos(this.Input.value);
-          this.Preregistro_.Desasegurar_AsegurarTiempo();
-        }
-        if (this.Preregistro_ ? this.Preregistro_.Ruta_.Distribuir_Sumar_Tiempo() : this.Ruta_.Distribuir_Sumar_Tiempo()) {
-          if (!InputCabecera) this.AnteriorTiempoAsignado = this.Preregistro_.TiempoAsignado;
-          this.Input.value = Minutos_a_Horas(Horas_a_Minutos(this.Input.value));
-          this.ValorAnterior = this.Input.value;
-        } else {
-          if (!InputCabecera) {
-            this.Preregistro_.TiempoAsignado = this.AnteriorTiempoAsignado;
-            this.Input.value = Minutos_a_Horas(this.Preregistro_.TiempoAsignado);
-            this.Preregistro_.Desasegurar_AsegurarTiempo();
+          if (InputCabecera) {
+            this.Ruta_.tiempoTotalMinutos = Horas_a_Minutos(this.Input.value);
           } else {
-            this.Input.value = this.ValorAnterior;
+            this.AnteriorTiempoAsignado = this.Preregistro_.TiempoAsignado;
+            this.Preregistro_.TiempoAsignado = Horas_a_Minutos(this.Input.value);
+            this.Preregistro_.Desasegurar_AsegurarTiempo();
+          }
+          if (this.Preregistro_ ? this.Preregistro_.Ruta_.Distribuir_Sumar_Tiempo() : this.Ruta_.Distribuir_Sumar_Tiempo()) {
+            if (!InputCabecera) this.AnteriorTiempoAsignado = this.Preregistro_.TiempoAsignado;
+            this.Input.value = Minutos_a_Horas(Horas_a_Minutos(this.Input.value));
+            this.ValorAnterior = this.Input.value;
+          } else {
+            if (!InputCabecera) {
+              this.Preregistro_.TiempoAsignado = this.AnteriorTiempoAsignado;
+              this.Input.value = Minutos_a_Horas(this.Preregistro_.TiempoAsignado);
+              this.Preregistro_.Desasegurar_AsegurarTiempo();
+            } else {
+              this.Input.value = this.ValorAnterior;
+            }
           }
         }
       }
