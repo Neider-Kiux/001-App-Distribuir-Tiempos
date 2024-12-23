@@ -26,6 +26,10 @@ export class DialogoEditar_ {
     FechaPreconcepto.readOnly = true;
     this.CantidadTiempo_ = new InputTiempo_(this, 'ancho--default border-style--default preconcepto__cantidad', false, true);
     this.CantidadTiempo_.Input.value = this.Preregistro_.InputTiempoPreregistro_.Input.value;
+    if (this.Preregistro_.Asegurado) {
+      this.CantidadTiempo_.Input.classList.add('asegurado');
+      this.CantidadTiempo_.Input.disabled = true;
+    }
     CFechaCantidad.appendChild(FechaPreconcepto);
     CFechaCantidad.appendChild(this.CantidadTiempo_.Input);
     const ContenedorDescripcion = new CrearElementoHTML('DIV', 'ContenedorDescripcion', 'contenedor-descripcion').getElement();
@@ -55,7 +59,7 @@ export class DialogoEditar_ {
       null,
       `<svg class="datos-registro__botones_button_svg" style="transform: scale(1.2)" viewBox="0 0 180 216"><use xlink:href="../img/sprite.svg#btn-clip"></use></svg>`,
     ).getElement();
-    const HerramientaCargar = new CrearElementoHTML(
+    const HerramientaGuardar = new CrearElementoHTML(
       'BUTTON',
       'Cargar',
       'herramientas-descripcion__opcion',
@@ -67,10 +71,12 @@ export class DialogoEditar_ {
       this.ClickOrtografia();
     });
 
+    HerramientaGuardar.addEventListener('click', this.GuardarDatos.bind(this));
+
     ContenedorDescripcionHerremientas.appendChild(HerramientaIdioma);
     ContenedorDescripcionHerremientas.appendChild(HerramientaOrtografia);
     ContenedorDescripcionHerremientas.appendChild(HerramientaClip);
-    ContenedorDescripcionHerremientas.appendChild(HerramientaCargar);
+    ContenedorDescripcionHerremientas.appendChild(HerramientaGuardar);
     ContenedorDescripcion.appendChild(this.Descripcion);
     ContenedorDescripcion.appendChild(ContenedorDescripcionHerremientas);
 
@@ -79,6 +85,15 @@ export class DialogoEditar_ {
 
     this.Background.appendChild(this.Dialogo);
     this.Dialogo.appendChild(DatosPreregistro);
+
+    this.OcultarScroll();
+    document.addEventListener('keydown', this.RemoverPreconcepto.bind(this), false);
+    this.Background.addEventListener('mousedown', this.CerrarPreconcepto.bind(this), false);
+  }
+
+  CerrarVentanaEmergente() {
+    this.QuitarBackgroundMostrarScroll();
+    //UPDATE: Si se han completado datos dentro de la ventana se debe preguntar si se quiere salir sin guardar.
   }
 
   ClickOrtografia() {
@@ -196,5 +211,52 @@ export class DialogoEditar_ {
           console.error('Error al realizar la solicitud:', error);
         });
     }
+  }
+
+  OcultarScroll() {
+    document.getElementById('main').classList.add('ocultar-scroll');
+  }
+
+  QuitarBackgroundMostrarScroll() {
+    document.getElementById('background').remove();
+    document.getElementById('main').classList.remove('ocultar-scroll');
+  }
+
+  CerrarPreconcepto(event) {
+    if (event.target.id == 'background' && document.getElementById('DatosPreregistros')) {
+      if (true) {
+        this.CerrarVentanaEmergente();
+      }
+    }
+  }
+
+  RemoverPreconcepto(event) {
+    if (event.key === 'Escape' && (document.getElementById('background') != null || document.getElementById('background') != undefined)) {
+      if (!document.querySelector('#second-background')) {
+        this.CerrarVentanaEmergente();
+      }
+      document.removeEventListener('keydown', this.RemoverPreconcepto.bind(this), false); //FIXME: No se está eliminando adecuadamente la función.
+    }
+  }
+
+  GuardarDatos() {
+    if (!this.Preregistro_.Activo) {
+      this.Preregistro_.ActivarPreregistro();
+    }
+    if (!this.Preregistro_.Asegurado) {
+      let AnteriorTiempoAsignadoPreregistroTexto = this.Preregistro_.InputTiempoPreregistro_.Input.value;
+      this.Preregistro_.TiempoAsignado = this.TiempoAsignado ? this.TiempoAsignado : 0;
+      if (this.TiempoAsignado && this.Preregistro_.InputTiempoPreregistro_.Input.value !== this.CantidadTiempo_.Input.value) {
+        this.Preregistro_.Desasegurar_AsegurarTiempo();
+      }
+      this.Preregistro_.InputTiempoPreregistro_.Input.value = this.CantidadTiempo_.Input.value ? this.CantidadTiempo_.Input.value : '00:00';
+      if (!this.Preregistro_.Ruta_.Distribuir_Sumar_Tiempo()) {
+        this.TiempoAsignado = this.Preregistro_.InputTiempoPreregistro_.AnteriorTiempoAsignado;
+        this.Preregistro_.InputTiempoPreregistro_.Input.value = AnteriorTiempoAsignadoPreregistroTexto;
+        this.Preregistro_.Desasegurar_AsegurarTiempo();
+      }
+    }
+    this.Preregistro_.descripcionPreregistro.innerHTML = this.Descripcion.innerHTML;
+    this.CerrarVentanaEmergente();
   }
 }

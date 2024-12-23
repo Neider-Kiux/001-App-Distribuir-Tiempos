@@ -16,6 +16,15 @@ button {
   padding: 0.1rem 0.3rem;
 }
 
+input:read-only.asegurado {
+  background-color: #fff !important;
+  color: var(--red);
+}
+
+input.InputTiempo {
+  text-align: center;
+}
+
 main {
   .vigilancia_judicial {
     width: 100%;
@@ -88,11 +97,6 @@ main {
 
       input:read-only {
         background-color: #aaa;
-      }
-
-      input:read-only.asegurado {
-        background-color: #ccc;
-        color: var(--red);
       }
 
       button:disabled {
@@ -254,6 +258,13 @@ main {
 @media screen and (min-width: 900px) {
   .vigilancia_judicial {
     max-width: 56.25rem;
+  }
+}
+
+@media screen and (min-width: 420px) {
+  .ocultar-scroll {
+    height: 100vh;
+    overflow: hidden;
   }
 }
 

@@ -61,7 +61,7 @@ class Ruta_ {
     this.#Ruta.appendChild(ContainerPregistros);
     this.#Ruta.appendChild(FooterRuta);
 
-    HeaderRuta.appendChild(new CrearElementoHTML_Text('P', this.nombre, null, 'ruta_titulo').getElement());
+    HeaderRuta.appendChild(new CrearElementoHTML_Text('P', `${this.nombre} - ${this.fecha}`, null, 'ruta_titulo').getElement());
     const sideHeaderRuta = new CrearElementoHTML('DIV', null, 'sideHeaderRuta').getElement();
     sideHeaderRuta.appendChild(this.InputTiempoTotal_.Input);
     sideHeaderRuta.appendChild(new CrearElementoHTML_Imagen('../img/unlink-svgrepo-com.svg', 'KIUX-Icon-blocked').getElement());
@@ -342,6 +342,7 @@ export class InputTiempo_ {
     else if (InputCabecera) this.Ruta_ = Contenedor_;
     else this.Preregistro_ = Contenedor_;
     this.Input = new CrearElementoHTML_Input('text', null, classList).getElement();
+    this.Input.classList.add('InputTiempo');
 
     this.Input.addEventListener('input', (e) => {
       this.verificarValor(e);
@@ -373,6 +374,12 @@ export class InputTiempo_ {
             }
           }
         }
+      }
+    });
+    this.Input.addEventListener('blur', () => {
+      if (InputVentanaEditar) {
+        this.VentanaEditar_.TiempoAsignado = Horas_a_Minutos(this.Input.value);
+        this.Input.value = Minutos_a_Horas(this.VentanaEditar_.TiempoAsignado);
       }
     });
   }
