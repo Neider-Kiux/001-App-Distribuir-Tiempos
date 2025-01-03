@@ -90,7 +90,48 @@ class Ruta_ {
     });
   }
   terminar() {
-    console.log(this.InputCheckAsegurar);
+    var ResultadoRuta = {
+      id: this.id,
+      nombre: this.nombre,
+      fecha: this.fecha,
+      registros: [],
+    };
+
+    var PreregistrosActivos = this.Preregistros_.filter((preregistro) => preregistro.Activo);
+    var PreregistrosSinDescripcion = 0;
+    var PreregistrosSinTiempo = 0;
+    PreregistrosActivos.forEach((preregistro) => {
+      if (!preregistro.descripcionPreregistro.innerHTML || preregistro.descripcionPreregistro.innerHTML == '<br>') {
+        PreregistrosSinDescripcion++;
+      }
+      if (preregistro.TiempoAsignado == 0) {
+        PreregistrosSinTiempo++;
+      }
+      if (!PreregistrosSinDescripcion || !PreregistrosSinTiempo) {
+        var registro = {
+          id: preregistro.id,
+          descripcion: preregistro.descripcionPreregistro.innerHTML,
+          tiempo: preregistro.TiempoAsignado,
+        };
+        ResultadoRuta.registros.push(registro);
+      }
+    });
+
+    if (PreregistrosSinDescripcion || PreregistrosSinTiempo) {
+      var MensajeError =
+        'Tienes registros incompletos: tienes' +
+        (PreregistrosSinDescripcion ? ` ${PreregistrosSinDescripcion} registro${PreregistrosSinDescripcion > 1 ? 's' : ''} sin descripción` : '') +
+        (PreregistrosSinDescripcion && PreregistrosSinTiempo ? ' y' : '') +
+        (PreregistrosSinTiempo ? ` ${PreregistrosSinTiempo} registro${PreregistrosSinTiempo > 1 ? 's' : ''} sin tiempo` : '') +
+        '.';
+      console.log(MensajeError);
+    } else {
+      if (ResultadoRuta.registros.length) {
+        console.log(ResultadoRuta);
+      } else {
+        console.log('No hay registros por actualizar');
+      }
+    }
   }
 
   DistribuirTiempo() {
@@ -161,6 +202,7 @@ class Ruta_ {
 
   ActivarTiempoFijo() {
     this.InputTiempoTotal_.Input.readOnly = false;
+    this.Distribuir_Sumar_Tiempo();
   }
   DesactivarTiempoFijo() {
     this.InputTiempoTotal_.Input.readOnly = true;
@@ -308,6 +350,7 @@ class Preregistro_ {
     this.Activo = true;
     this.botonDeshabilitar.disabled = false;
     this.InputTiempoPreregistro_.Input.disabled = false;
+    this.InputTiempoPreregistro_.Input.value = '00:00';
     this.descripcionPreregistro.classList.remove('disabled');
     this.Ruta_.Distribuir_Sumar_Tiempo();
   }
